@@ -1,0 +1,43 @@
+= Neo4j Extension Sample
+:branch: 3.4
+:root: https://github.com/ggszk/neo4j-extension-sample/
+
+This project is an example you can use to build user defined procedures for Neo4j graph database.
+Japanese introduction is the following : 
+https://qiita.com/ggszk/items/c15e6e346aef5e19f8ed
+
+[Note]
+This project requires a Neo4j {branch}.x dependency.
+
+
+=== User Defined Procedure
+
+The user defined procedure allows you to join strings (sample4_1) and to get 1hop paths (sample4_2).
+
+See link:{root}/main/java/org/ggszk/ext_sample/Sample.java[`Sample.java`].
+
+[source,cypher]
+----
+MATCH (n:Person)
+CALL example.sample4_1(n.name, n.name) yield out as out
+return out limit 10
+----
+
+[source,cypher]
+----
+CALL example.sample4_2(1)
+----
+
+== Building
+
+This project uses maven, to build a jar-file with the procedure in this
+project, simply package the project with maven:
+
+    mvn clean package
+
+This will produce a jar-file,`target/neo4j-exetnsion-sample-0.1.jar`,
+that can be deployed in the `plugin` directory of your Neo4j instance.
+
+== License
+
+Apache License V2, see LICENSE
