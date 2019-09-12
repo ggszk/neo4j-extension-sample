@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.stream.Stream;
 
@@ -73,14 +75,12 @@ public class Sample
     @Description("sample6_1: BFS")
     public Stream<Output> sample6_1( @Name("id") Long id )
     {
-    	int max_nodes = 100;
+    	// map for keeping Node id and parent relationship
+    	Map<Long, Relationship> parent = new LinkedHashMap<>();
+		// to avoid coming back to start node
+		parent.put(id, null);
     	// array for checking whether the node was visited 
-    	Boolean[] visited = new Boolean[max_nodes];
-    	for(int i = 0; i < max_nodes ; ++i) {
-    		visited[i] = false;
-    	}
-    	// array for keeping relationship to parent
-    	Relationship[] parent_rel = new Relationship[max_nodes];
+    	List<Long> visited = new ArrayList<>(); 
     	// queue
     	Queue<Node> queue = new ArrayDeque<>();
     	// start node
@@ -92,23 +92,23 @@ public class Sample
 		// end if queue is empty
 		while(c_nd != null) {
 			Iterable<Relationship> rels = c_nd.getRelationships();
-			Integer c_nd_no = new Integer(c_nd.getProperty("no").toString());
-			if(!(visited[c_nd_no])) {
+			Long c_nd_no = c_nd.getId();
+			if(!(visited.contains(c_nd_no))) {
 				for(Relationship rel: rels){
 					// if not visited add next node
 					Node n_nd = rel.getOtherNode(c_nd);
-					Integer n_nd_no = new Integer(n_nd.getProperty("no").toString());
-					if(!(visited[n_nd_no])) {
-						queue.add(n_nd);						
-						parent_rel[n_nd_no] = rel;
+					Long n_nd_no = n_nd.getId();
+					if(!parent.containsKey(n_nd_no)) {
+						queue.add(n_nd);
+						parent.put(n_nd_no, rel);
 					}
 				}			
-				visited[c_nd_no] = true;
+				visited.add(c_nd_no);
 			}
 	    	Output o = new Output();
 	    	o.node = c_nd;
 	    	// get path from start_nd to o
-	    	o.path = getPath(start_nd, c_nd, parent_rel);
+	    	o.path = getPath(start_nd, c_nd, parent);
 	    	o_l.add(o);
 	    	// get next node from queue
 			c_nd = queue.poll();
@@ -117,16 +117,14 @@ public class Sample
     }
     
     // construct path from parent relationships
-    public Path getPath(Node frm_nd, Node to_nd, Relationship[] prt_rel) {
+    public Path getPath(Node frm_nd, Node to_nd, Map<Long, Relationship> parent) {
     	PathImpl.Builder builder = new PathImpl.Builder(frm_nd);
     	List<Relationship> r_list = new ArrayList<Relationship>();
     	Node tmp_nd = to_nd;
-		Integer to_nd_no = new Integer(to_nd.getProperty("no").toString());
-    	Integer tmp_nd_no = to_nd_no;
     	while(tmp_nd.getId() != frm_nd.getId()) {
-	    	r_list.add(prt_rel[tmp_nd_no]);
-	    	tmp_nd = prt_rel[tmp_nd_no].getOtherNode(tmp_nd);
-			tmp_nd_no = new Integer(tmp_nd.getProperty("no").toString());		    	
+    		Relationship r = parent.get(tmp_nd.getId());
+	    	r_list.add(r);
+	    	tmp_nd = r.getOtherNode(tmp_nd);
     	}
     	Collections.reverse(r_list);
     	for(Relationship r : r_list) {
@@ -140,14 +138,14 @@ public class Sample
     @Description("sample6_2: DFS")
     public Stream<Output> sample6_2( @Name("id") Long id )
     {
-    	int max_nodes = 100;
+    	// map for keeping Node id and parent relationship
+    	Map<Long, Relationship> parent = new LinkedHashMap<>();
+		// to avoid coming back to start node
+		parent.put(id, null);
     	// array for checking whether the node was visited 
-    	Boolean[] visited = new Boolean[max_nodes];
-    	for(int i = 0; i < max_nodes ; ++i) {
-    		visited[i] = false;
-    	}
+    	List<Long> visited = new ArrayList<>(); 
     	// queue
-    	Deque<Node> deque = new ArrayDeque<>();
+    	Deque<Node> queue = new ArrayDeque<>();
     	// start node
     	Node start_nd = db.getNodeById(id);
 		// current node
@@ -157,23 +155,26 @@ public class Sample
 		// end if queue is empty
 		while(c_nd != null) {
 			Iterable<Relationship> rels = c_nd.getRelationships();
-			Integer c_nd_no = new Integer(c_nd.getProperty("no").toString());
-			if(!(visited[c_nd_no])) {
+			Long c_nd_no = c_nd.getId();
+			if(!(visited.contains(c_nd_no))) {
 				for(Relationship rel: rels){
 					// if not visited add next node
 					Node n_nd = rel.getOtherNode(c_nd);
-					Integer n_nd_no = new Integer(n_nd.getProperty("no").toString());
-					if(!(visited[n_nd_no])) {
-						deque.push(n_nd);						
+					Long n_nd_no = n_nd.getId();
+					if(!parent.containsKey(n_nd_no)) {
+						queue.push(n_nd);
+						parent.put(n_nd_no, rel);
 					}
 				}			
-				visited[c_nd_no] = true;
+				visited.add(c_nd_no);
 			}
 	    	Output o = new Output();
 	    	o.node = c_nd;
+	    	// get path from start_nd to o
+	    	o.path = getPath(start_nd, c_nd, parent);
 	    	o_l.add(o);
 	    	// get next node from queue
-			c_nd = deque.poll();
+	    	c_nd = queue.poll();
 		}
     	return o_l.stream();
     } 
