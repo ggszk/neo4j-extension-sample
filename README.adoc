@@ -1,10 +1,10 @@
 = Neo4j Extension Sample
-:branch: 3.4
+:branch: 3.5
 :root: https://github.com/ggszk/neo4j-extension-sample/
 
 This project is an example you can use to build user defined procedures for Neo4j graph database.
 Japanese introduction is the following : 
-https://qiita.com/ggszk/items/c15e6e346aef5e19f8ed
+https://qiita.com/ggszk/items/4884f764936686d740e1
 
 [Note]
 This project requires a Neo4j {branch}.x dependency.
