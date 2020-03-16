@@ -157,6 +157,33 @@ public class SampleTest
         	assertThat(costs.get(0), equalTo(12.0));
         }    	
     }
+    @Test
+    public void sample9_1test() throws Throwable
+    {
+        // In a try-block, to make sure we close the driver and session after the test
+        try(Driver driver = GraphDatabase.driver( neo4j.boltURI() , Config.build()
+                .withEncryptionLevel( Config.EncryptionLevel.NONE ).toConfig() );
+            Session session = driver.session() )
+        {
+        	createSample01(session);
+        	long fromId = session.run( "match (n {no:0}) RETURN id(n)" )
+                    .single()
+                    .get( 0 ).asLong();
+        	long toId = session.run( "match (n {no:8}) RETURN id(n)" )
+                    .single()
+                    .get( 0 ).asLong();
+            String category = "ramen";
+        	StatementResult r = session.run( "CALL example.sample9_1(" + fromId + ", " + toId + ", '" + category + "') yield path, cost return path, cost" );
+        	List<Double> costs = new ArrayList<Double>();
+        	while(r.hasNext()) {
+        		Record rec = r.next();
+        		System.out.println(rec.get(0).asPath().toString());        			
+        		System.out.println(PathtoString(rec.get(0).asPath()));       			
+        		costs.add(rec.get(1).asDouble());
+        	}
+        	assertThat(costs.get(0), equalTo(12.0));
+        }    	
+    }
 	// print path
 	public String PathtoString(Path p) {
 		String s = "";

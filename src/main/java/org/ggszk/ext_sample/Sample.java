@@ -336,6 +336,100 @@ public class Sample {
 		return o_l.stream();
 	}
 
+	// sample9_1: simple trip plannning query
+	@Procedure(value = "example.sample9_1")
+	@Description("sample9_1: simple trip plannning query")
+	public Stream<Output> sample9_1(@Name("from_id") Long from_id, @Name("to_id") Long to_id, @Name("category") String category) {
+		Node from_nd = db.getNodeById(from_id);
+		Node to_nd = db.getNodeById(to_id);
+		// Priority Queue by cost property value
+		PriorityQueue<NodeInfo> pq_f = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
+		PriorityQueue<NodeInfo> pq_t = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
+		// map for keeping node and cost
+		Map<Node, NodeInfo> nodes_f = new HashMap<>();
+		Map<Node, NodeInfo> nodes_t = new HashMap<>();
+		// map for keeping Node and parent relationship
+		Map<Node, Relationship> parent_f = new HashMap<>();
+		Map<Node, Relationship> parent_t = new HashMap<>();
+		
+		// current node(info)
+		NodeInfo cur_ni_f = new NodeInfo(from_nd, 0.0);
+		pq_f.add(cur_ni_f);
+		nodes_f.put(from_nd, cur_ni_f);
+		NodeInfo cur_ni_t = new NodeInfo(to_nd, 0.0);
+		pq_t.add(cur_ni_t);
+		nodes_t.put(to_nd, cur_ni_t);
+
+		// node that f-side path and t-side path meets
+		NodeInfo min_ni_f = null;
+		NodeInfo min_ni_t = null;
+
+		// variables for checking to exit
+		double total_cost = 100000; // total cost
+
+		// Result
+		Output o = new Output();
+
+		// Path finding
+		while(true) {
+			// if one queue is empty, no route exit
+			if(cur_ni_f == null || cur_ni_t == null) {
+				return new ArrayList<Output>().stream();
+			}
+			// exit when found to node in the from-side
+			if(cur_ni_f.nd.equals(to_nd)) {
+	    		o.path = getPath(from_nd, min_ni_f.nd, parent_f);				
+	    		o.cost = cur_ni_f.cost;
+	    		break;
+			}
+			// exit when found from node in the to-side
+			if(cur_ni_t.nd.equals(from_nd)) {
+	    		o.path = reverse(getPath(to_nd, min_ni_t.nd, parent_t));
+	    		o.cost = cur_ni_t.cost;
+	    		break;			
+			}
+		    // exit when cannot find shorter path (triangle inequality)
+	    	// (total cost) < (current f-side cost) + (current t-side cost)
+	    	if(cur_ni_f.cost + cur_ni_t.cost > total_cost){
+	    		Path f_path = getPath(from_nd, min_ni_f.nd, parent_f);
+	    		Path t_path = getPath(to_nd, min_ni_t.nd, parent_t);
+	    		o.path = cat(f_path, reverse(t_path));
+	    		o.cost = total_cost;
+	    		break;
+	    	}
+			// top node of queue's cost is fixed
+			cur_ni_f = pq_f.poll();
+			cur_ni_f.done = true;
+			cur_ni_t = pq_t.poll();
+			cur_ni_t.done = true;
+			
+			// found total path
+			// find the node in the other side
+			NodeInfo ni_t = nodes_t.get(cur_ni_f.nd);
+			NodeInfo ni_f = nodes_f.get(cur_ni_t.nd);	
+			
+			// the node is in the other side map and cost has been fixed (done)
+			if(ni_t != null && ni_t.done == true) {
+				min_ni_f = cur_ni_f;
+				min_ni_t = ni_t;
+				total_cost = cur_ni_f.cost + ni_t.cost;					
+			}
+			if(ni_f != null && ni_f.done == true) {
+				min_ni_f = ni_f;
+				min_ni_t = cur_ni_t;
+				total_cost = ni_f.cost + cur_ni_t.cost;	
+			}
+			// get adjacent nodes and add them to queue
+			// Property for cost: type must be double
+			getAdjacentNodes(cur_ni_f, pq_f, nodes_f, parent_f);
+			getAdjacentNodes(cur_ni_t, pq_t, nodes_t, parent_t);
+		}
+		// list for result
+		List<Output> o_l = new ArrayList<>();
+		o_l.add(o);
+		return o_l.stream();
+	}
+
 	// reverse Path
 	public Path reverse(Path p) {
 		PathImpl.Builder builder = new PathImpl.Builder(p.endNode());		
