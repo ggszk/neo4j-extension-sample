@@ -41,6 +41,7 @@ public class Sample {
 		public Node node;
 		public Path path;
 		public double cost;
+		public Node poi;
 	}
 
 	// sample4_1
@@ -271,7 +272,7 @@ public class Sample {
 		NodeInfo min_ni_t = null;
 
 		// variables for checking to exit
-		double total_cost = 100000; // total cost
+		double total_cost = 100000; // 100000 is infinity
 
 		// Result
 		final Output o = new Output();
@@ -368,10 +369,16 @@ public class Sample {
 		NodeInfo min_ni_t = null;
 
 		// variables for checking to exit
-		double total_cost = 100000; // total cost
+		double total_cost = 100000; // 100000 is infinity
 
 		// Result
 		final Output o = new Output();
+
+		// property name for category
+		final String category_property = "category";
+
+		// Temporary variable for POI
+		Node poi = null;
 
 		// Path finding
 		while(true) {
@@ -379,53 +386,56 @@ public class Sample {
 			if(cur_ni_f == null || cur_ni_t == null) {
 				return new ArrayList<Output>().stream();
 			}
-			// exit when found to node in the from-side
-			if(cur_ni_f.nd.equals(to_nd)) {
-	    		o.path = getPath(from_nd, min_ni_f.nd, parent_f);				
-	    		o.cost = cur_ni_f.cost;
-	    		break;
-			}
-			// exit when found from node in the to-side
-			if(cur_ni_t.nd.equals(from_nd)) {
-	    		o.path = reverse(getPath(to_nd, min_ni_t.nd, parent_t));
-	    		o.cost = cur_ni_t.cost;
-	    		break;			
-			}
 		    // exit when cannot find shorter path (triangle inequality)
-	    	// (total cost) < (current f-side cost) + (current t-side cost)
+			// (total cost) < (current f-side cost) + (current t-side cost)
 	    	if(cur_ni_f.cost + cur_ni_t.cost > total_cost){
 	    		final Path f_path = getPath(from_nd, min_ni_f.nd, parent_f);
 	    		final Path t_path = getPath(to_nd, min_ni_t.nd, parent_t);
 	    		o.path = cat(f_path, reverse(t_path));
-	    		o.cost = total_cost;
+				o.cost = total_cost;
+				o.poi = poi;
 	    		break;
-	    	}
-			// top node of queue's cost is fixed
-			cur_ni_f = pq_f.poll();
-			cur_ni_f.done = true;
-			cur_ni_t = pq_t.poll();
-			cur_ni_t.done = true;
-			
-			// found total path
-			// find the node in the other side
-			final NodeInfo ni_t = nodes_t.get(cur_ni_f.nd);
-			final NodeInfo ni_f = nodes_f.get(cur_ni_t.nd);	
-			
-			// the node is in the other side map and cost has been fixed (done)
-			if(ni_t != null && ni_t.done == true) {
-				min_ni_f = cur_ni_f;
-				min_ni_t = ni_t;
-				total_cost = cur_ni_f.cost + ni_t.cost;					
 			}
-			if(ni_f != null && ni_f.done == true) {
-				min_ni_f = ni_f;
-				min_ni_t = cur_ni_t;
-				total_cost = ni_f.cost + cur_ni_t.cost;	
+			// expand from-side
+			if(pq_f.peek().cost <= pq_t.peek().cost){
+				// top node of queue's cost is fixed
+				cur_ni_f = pq_f.poll();
+				cur_ni_f.done = true;
+				// If POI is found, check total path
+				if(cur_ni_f.nd.getProperty(category_property, "If property is missing, this value will be returned").equals(category)){
+					// find the node in the other side
+					final NodeInfo ni_t = nodes_t.get(cur_ni_f.nd);
+					// the node is in the other side map , it is poi, and total_cost can be lower
+					if(ni_t != null && ni_t.nd.getProperty(category_property, "If property is missing, this value will be returned").equals(category) && total_cost > cur_ni_f.cost + ni_t.cost) {
+						min_ni_f = cur_ni_f;
+						min_ni_t = ni_t;
+						poi = ni_t.nd;
+						total_cost = cur_ni_f.cost + ni_t.cost;					
+					}
+				}
+				// get adjacent nodes and add them to queue
+				// Property for cost: type must be double
+				getAdjacentNodes(cur_ni_f, pq_f, nodes_f, parent_f);
 			}
-			// get adjacent nodes and add them to queue
-			// Property for cost: type must be double
-			getAdjacentNodes(cur_ni_f, pq_f, nodes_f, parent_f);
-			getAdjacentNodes(cur_ni_t, pq_t, nodes_t, parent_t);
+			// expand to-side
+			else{
+				cur_ni_t = pq_t.poll();
+				cur_ni_t.done = true;
+				// If POI is found, check total path
+				if (cur_ni_t.nd.getProperty(category_property, "If property is missing, this value will be returned").equals(category)) {
+					// find the node in the other side
+					final NodeInfo ni_f = nodes_f.get(cur_ni_t.nd);
+					// the node is in the other side map , it is poi, and total_cost can be lower
+					if (ni_f != null && ni_f.nd.getProperty(category_property, "If property is missing, this value will be returned").equals(category)
+							&& total_cost > cur_ni_t.cost + ni_f.cost) {
+						min_ni_t = cur_ni_t;
+						min_ni_f = ni_f;
+						poi = ni_f.nd;
+						total_cost = cur_ni_t.cost + ni_f.cost;
+					}
+				}
+				getAdjacentNodes(cur_ni_t, pq_t, nodes_t, parent_t);
+			}			
 		}
 		// list for result
 		final List<Output> o_l = new ArrayList<>();

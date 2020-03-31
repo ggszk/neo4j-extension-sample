@@ -171,13 +171,14 @@ public class SampleTest
                     .single()
                     .get( 0 ).asLong();
             String category = "ramen";
-        	StatementResult r = session.run( "CALL example.sample9_1(" + fromId + ", " + toId + ", '" + category + "') yield path, cost return path, cost" );
+        	StatementResult r = session.run( "CALL example.sample9_1(" + fromId + ", " + toId + ", '" + category + "') yield path, cost, poi return path, cost, poi" );
         	List<Double> costs = new ArrayList<Double>();
         	while(r.hasNext()) {
         		Record rec = r.next();
         		System.out.println(rec.get(0).asPath().toString());        			
         		System.out.println(PathtoString(rec.get(0).asPath()));       			
         		costs.add(rec.get(1).asDouble());
+        		System.out.println("POI: " + rec.get(2).asNode().toString());   			
         	}
         	assertThat(costs.get(0), equalTo(12.0));
         }    	
