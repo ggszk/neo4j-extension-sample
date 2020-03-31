@@ -46,8 +46,8 @@ public class Sample {
 	// sample4_1
 	@Procedure(value = "example.sample4_1")
 	@Description("ggszk sample4_1")
-	public Stream<Output> sample4_1(@Name("f_name") String f_name, @Name("l_name") String l_name) {
-		Output o = new Output();
+	public Stream<Output> sample4_1(@Name("f_name") final String f_name, @Name("l_name") final String l_name) {
+		final Output o = new Output();
 		o.out = "hello: " + f_name + " " + l_name;
 		return Arrays.asList(o).stream();
 	}
@@ -55,14 +55,14 @@ public class Sample {
 	// sample4_2
 	@Procedure(value = "example.sample4_2")
 	@Description("sample4_2: return adjacent paths for given node id")
-	public Stream<Output> sample4_2(@Name("id") Long id) {
-		Node from_nd = db.getNodeById(id);
-		Iterable<Relationship> rels = from_nd.getRelationships();
-		List<Output> o_l = new ArrayList<Output>();
-		for (Relationship rel : rels) {
+	public Stream<Output> sample4_2(@Name("id") final Long id) {
+		final Node from_nd = db.getNodeById(id);
+		final Iterable<Relationship> rels = from_nd.getRelationships();
+		final List<Output> o_l = new ArrayList<Output>();
+		for (final Relationship rel : rels) {
 			PathImpl.Builder builder = new PathImpl.Builder(from_nd);
 			builder = builder.push(rel);
-			Output o = new Output();
+			final Output o = new Output();
 			o.path = builder.build();
 			o_l.add(o);
 		}
@@ -72,28 +72,28 @@ public class Sample {
 	// sample6_1: BFS
 	@Procedure(value = "example.sample6_1")
 	@Description("sample6_1: BFS")
-	public Stream<Output> sample6_1(@Name("id") Long id) {
+	public Stream<Output> sample6_1(@Name("id") final Long id) {
 		// start node
-		Node start_nd = db.getNodeById(id);
+		final Node start_nd = db.getNodeById(id);
 		// map for keeping Node and parent relationship
-		Map<Node, Relationship> parent = new HashMap<>();
+		final Map<Node, Relationship> parent = new HashMap<>();
 		// to avoid coming back to start node
 		parent.put(start_nd, null);
 		// array for checking whether the node was visited
-		List<Node> visited = new ArrayList<>();
+		final List<Node> visited = new ArrayList<>();
 		// queue
-		Queue<Node> queue = new ArrayDeque<>();
+		final Queue<Node> queue = new ArrayDeque<>();
 		// current node
 		Node c_nd = start_nd;
 		// list for result
-		List<Output> o_l = new ArrayList<>();
+		final List<Output> o_l = new ArrayList<>();
 		// end if queue is empty
 		while (c_nd != null) {
-			Iterable<Relationship> rels = c_nd.getRelationships();
+			final Iterable<Relationship> rels = c_nd.getRelationships();
 			if (!(visited.contains(c_nd))) {
-				for (Relationship rel : rels) {
+				for (final Relationship rel : rels) {
 					// if not visited add next node
-					Node n_nd = rel.getOtherNode(c_nd);
+					final Node n_nd = rel.getOtherNode(c_nd);
 					if (!parent.containsKey(n_nd)) {
 						queue.add(n_nd);
 						parent.put(n_nd, rel);
@@ -101,7 +101,7 @@ public class Sample {
 				}
 				visited.add(c_nd);
 			}
-			Output o = new Output();
+			final Output o = new Output();
 			o.node = c_nd;
 			// get path from start_nd to c_nd
 			o.path = getPath(start_nd, c_nd, parent);
@@ -113,14 +113,14 @@ public class Sample {
 	}
 
 	// construct path from parent relationships
-	public Path getPath(Node frm_nd, Node to_nd, Map<Node, Relationship> parent) {
+	public Path getPath(final Node frm_nd, final Node to_nd, final Map<Node, Relationship> parent) {
 		PathImpl.Builder builder = new PathImpl.Builder(frm_nd);
 		// queue
-		Deque<Relationship> queue = new ArrayDeque<>();
+		final Deque<Relationship> queue = new ArrayDeque<>();
 
 		Node tmp_nd = to_nd;
 		while (!tmp_nd.equals(frm_nd)) {
-			Relationship r = parent.get(tmp_nd);
+			final Relationship r = parent.get(tmp_nd);
 			queue.push(r);
 			tmp_nd = r.getOtherNode(tmp_nd);
 		}
@@ -135,28 +135,28 @@ public class Sample {
 	// sample6_2: DFS
 	@Procedure(value = "example.sample6_2")
 	@Description("sample6_2: DFS")
-	public Stream<Output> sample6_2(@Name("id") Long id) {
+	public Stream<Output> sample6_2(@Name("id") final Long id) {
 		// start node
-		Node start_nd = db.getNodeById(id);
+		final Node start_nd = db.getNodeById(id);
 		// map for keeping Node id and parent relationship
-		Map<Node, Relationship> parent = new HashMap<>();
+		final Map<Node, Relationship> parent = new HashMap<>();
 		// to avoid coming back to start node
 		parent.put(start_nd, null);
 		// array for checking whether the node was visited
-		List<Node> visited = new ArrayList<>();
+		final List<Node> visited = new ArrayList<>();
 		// queue
-		Deque<Node> queue = new ArrayDeque<>();
+		final Deque<Node> queue = new ArrayDeque<>();
 		// current node
 		Node c_nd = start_nd;
 		// list for result
-		List<Output> o_l = new ArrayList<>();
+		final List<Output> o_l = new ArrayList<>();
 		// end if queue is empty
 		while (c_nd != null) {
-			Iterable<Relationship> rels = c_nd.getRelationships();
+			final Iterable<Relationship> rels = c_nd.getRelationships();
 			if (!(visited.contains(c_nd))) {
-				for (Relationship rel : rels) {
+				for (final Relationship rel : rels) {
 					// if not visited add next node
-					Node n_nd = rel.getOtherNode(c_nd);
+					final Node n_nd = rel.getOtherNode(c_nd);
 					if (!parent.containsKey(n_nd)) {
 						queue.push(n_nd);
 						parent.put(n_nd, rel);
@@ -164,7 +164,7 @@ public class Sample {
 				}
 				visited.add(c_nd);
 			}
-			Output o = new Output();
+			final Output o = new Output();
 			o.node = c_nd;
 			// get path from start_nd to c_nd
 			o.path = getPath(start_nd, c_nd, parent);
@@ -178,15 +178,15 @@ public class Sample {
 	// sample8_1: djkstra
 	@Procedure(value = "example.sample8_1")
 	@Description("sample8_1: djkstra")
-	public Stream<Output> sample8_1(@Name("from_id") Long from_id, @Name("to_id") Long to_id) {
-		Node from_nd = db.getNodeById(from_id);
-		Node to_nd = db.getNodeById(to_id);
+	public Stream<Output> sample8_1(@Name("from_id") final Long from_id, @Name("to_id") final Long to_id) {
+		final Node from_nd = db.getNodeById(from_id);
+		final Node to_nd = db.getNodeById(to_id);
 		// Priority Queue by cost property value
-		PriorityQueue<NodeInfo> pq = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
+		final PriorityQueue<NodeInfo> pq = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
 		// map for keeping node and cost
-		Map<Node, NodeInfo> nodes = new HashMap<>();
+		final Map<Node, NodeInfo> nodes = new HashMap<>();
 		// map for keeping Node and parent relationship
-		Map<Node, Relationship> parent = new HashMap<>();
+		final Map<Node, Relationship> parent = new HashMap<>();
 
 		// current node(info)
 		NodeInfo cur_ni = new NodeInfo(from_nd, 0.0);
@@ -205,12 +205,12 @@ public class Sample {
 			cur_ni.done = true;
 			// get adjacent nodes and add them to queue
 			// Property for cost: type must be double
-			String cost_property = "cost";
-			Iterable<Relationship> rels = cur_ni.nd.getRelationships();
-			for (Relationship rel : rels) {
+			final String cost_property = "cost";
+			final Iterable<Relationship> rels = cur_ni.nd.getRelationships();
+			for (final Relationship rel : rels) {
 				// get adjacent nodes and their costs
-				Node o_nd = rel.getOtherNode(cur_ni.nd);
-				double cost_rel = (double) rel.getProperty(cost_property);
+				final Node o_nd = rel.getOtherNode(cur_ni.nd);
+				final double cost_rel = (double) rel.getProperty(cost_property);
 				// check whether the node was found
 				NodeInfo next_ni = nodes.get(o_nd);
 				// not found -> 1st appearance of the node, add it to map
@@ -233,11 +233,11 @@ public class Sample {
 			to_ni = nodes.get(to_nd);
 		}
 		// output construction
-		Output o = new Output();
+		final Output o = new Output();
 		o.path = getPath(from_nd, to_nd, parent);
 		o.cost = to_ni.cost;
 		// list for result
-		List<Output> o_l = new ArrayList<>();
+		final List<Output> o_l = new ArrayList<>();
 		o_l.add(o);
 		return o_l.stream();
 	}
@@ -245,18 +245,18 @@ public class Sample {
 	// sample8_2: bidirectional djkstra
 	@Procedure(value = "example.sample8_2")
 	@Description("sample8_2: bidirectional djkstra")
-	public Stream<Output> sample8_2(@Name("from_id") Long from_id, @Name("to_id") Long to_id) {
-		Node from_nd = db.getNodeById(from_id);
-		Node to_nd = db.getNodeById(to_id);
+	public Stream<Output> sample8_2(@Name("from_id") final Long from_id, @Name("to_id") final Long to_id) {
+		final Node from_nd = db.getNodeById(from_id);
+		final Node to_nd = db.getNodeById(to_id);
 		// Priority Queue by cost property value
-		PriorityQueue<NodeInfo> pq_f = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
-		PriorityQueue<NodeInfo> pq_t = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
+		final PriorityQueue<NodeInfo> pq_f = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
+		final PriorityQueue<NodeInfo> pq_t = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
 		// map for keeping node and cost
-		Map<Node, NodeInfo> nodes_f = new HashMap<>();
-		Map<Node, NodeInfo> nodes_t = new HashMap<>();
+		final Map<Node, NodeInfo> nodes_f = new HashMap<>();
+		final Map<Node, NodeInfo> nodes_t = new HashMap<>();
 		// map for keeping Node and parent relationship
-		Map<Node, Relationship> parent_f = new HashMap<>();
-		Map<Node, Relationship> parent_t = new HashMap<>();
+		final Map<Node, Relationship> parent_f = new HashMap<>();
+		final Map<Node, Relationship> parent_t = new HashMap<>();
 		
 		// current node(info)
 		NodeInfo cur_ni_f = new NodeInfo(from_nd, 0.0);
@@ -274,7 +274,7 @@ public class Sample {
 		double total_cost = 100000; // total cost
 
 		// Result
-		Output o = new Output();
+		final Output o = new Output();
 
 		// Path finding
 		while(true) {
@@ -284,7 +284,7 @@ public class Sample {
 			}
 			// exit when found to node in the from-side
 			if(cur_ni_f.nd.equals(to_nd)) {
-	    		o.path = getPath(from_nd, min_ni_f.nd, parent_f);				
+				o.path = getPath(from_nd, min_ni_f.nd, parent_f);
 	    		o.cost = cur_ni_f.cost;
 	    		break;
 			}
@@ -295,43 +295,46 @@ public class Sample {
 	    		break;			
 			}
 		    // exit when cannot find shorter path (triangle inequality)
-	    	// (total cost) < (current f-side cost) + (current t-side cost)
+			// (total cost) < (current f-side cost) + (current t-side cost)
 	    	if(cur_ni_f.cost + cur_ni_t.cost > total_cost){
-	    		Path f_path = getPath(from_nd, min_ni_f.nd, parent_f);
-	    		Path t_path = getPath(to_nd, min_ni_t.nd, parent_t);
+	    		final Path f_path = getPath(from_nd, min_ni_f.nd, parent_f);
+	    		final Path t_path = getPath(to_nd, min_ni_t.nd, parent_t);
 	    		o.path = cat(f_path, reverse(t_path));
 	    		o.cost = total_cost;
 	    		break;
-	    	}
-			// top node of queue's cost is fixed
-			cur_ni_f = pq_f.poll();
-			cur_ni_f.done = true;
-			cur_ni_t = pq_t.poll();
-			cur_ni_t.done = true;
-			
-			// found total path
-			// find the node in the other side
-			NodeInfo ni_t = nodes_t.get(cur_ni_f.nd);
-			NodeInfo ni_f = nodes_f.get(cur_ni_t.nd);	
-			
-			// the node is in the other side map and cost has been fixed (done)
-			if(ni_t != null && ni_t.done == true) {
-				min_ni_f = cur_ni_f;
-				min_ni_t = ni_t;
-				total_cost = cur_ni_f.cost + ni_t.cost;					
 			}
-			if(ni_f != null && ni_f.done == true) {
-				min_ni_f = ni_f;
-				min_ni_t = cur_ni_t;
-				total_cost = ni_f.cost + cur_ni_t.cost;	
+			// expand from-side
+			if(pq_f.peek().cost <= pq_t.peek().cost){
+				// top node of queue's cost is fixed
+				cur_ni_f = pq_f.poll();
+				cur_ni_f.done = true;
+				// find the node in the other side
+				final NodeInfo ni_t = nodes_t.get(cur_ni_f.nd);
+				// the node is in the other side map and total_cost can be lower
+				if(ni_t != null && total_cost > cur_ni_f.cost + ni_t.cost) {
+					min_ni_f = cur_ni_f;
+					min_ni_t = ni_t;
+					total_cost = cur_ni_f.cost + ni_t.cost;					
+				}
+				// get adjacent nodes and add them to queue
+				// Property for cost: type must be double
+				getAdjacentNodes(cur_ni_f, pq_f, nodes_f, parent_f);
 			}
-			// get adjacent nodes and add them to queue
-			// Property for cost: type must be double
-			getAdjacentNodes(cur_ni_f, pq_f, nodes_f, parent_f);
-			getAdjacentNodes(cur_ni_t, pq_t, nodes_t, parent_t);
+			// expand to-side
+			else{
+				cur_ni_t = pq_t.poll();
+				cur_ni_t.done = true;
+				final NodeInfo ni_f = nodes_f.get(cur_ni_t.nd);	
+				if(ni_f != null && total_cost > ni_f.cost + cur_ni_t.cost) {
+					min_ni_f = ni_f;
+					min_ni_t = cur_ni_t;
+					total_cost = ni_f.cost + cur_ni_t.cost;	
+				}		
+				getAdjacentNodes(cur_ni_t, pq_t, nodes_t, parent_t);
+			}			
 		}
 		// list for result
-		List<Output> o_l = new ArrayList<>();
+		final List<Output> o_l = new ArrayList<>();
 		o_l.add(o);
 		return o_l.stream();
 	}
@@ -339,18 +342,18 @@ public class Sample {
 	// sample9_1: simple trip plannning query
 	@Procedure(value = "example.sample9_1")
 	@Description("sample9_1: simple trip plannning query")
-	public Stream<Output> sample9_1(@Name("from_id") Long from_id, @Name("to_id") Long to_id, @Name("category") String category) {
-		Node from_nd = db.getNodeById(from_id);
-		Node to_nd = db.getNodeById(to_id);
+	public Stream<Output> sample9_1(@Name("from_id") final Long from_id, @Name("to_id") final Long to_id, @Name("category") final String category) {
+		final Node from_nd = db.getNodeById(from_id);
+		final Node to_nd = db.getNodeById(to_id);
 		// Priority Queue by cost property value
-		PriorityQueue<NodeInfo> pq_f = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
-		PriorityQueue<NodeInfo> pq_t = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
+		final PriorityQueue<NodeInfo> pq_f = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
+		final PriorityQueue<NodeInfo> pq_t = new PriorityQueue<>((n1, n2) -> Double.compare(n1.cost, n2.cost));
 		// map for keeping node and cost
-		Map<Node, NodeInfo> nodes_f = new HashMap<>();
-		Map<Node, NodeInfo> nodes_t = new HashMap<>();
+		final Map<Node, NodeInfo> nodes_f = new HashMap<>();
+		final Map<Node, NodeInfo> nodes_t = new HashMap<>();
 		// map for keeping Node and parent relationship
-		Map<Node, Relationship> parent_f = new HashMap<>();
-		Map<Node, Relationship> parent_t = new HashMap<>();
+		final Map<Node, Relationship> parent_f = new HashMap<>();
+		final Map<Node, Relationship> parent_t = new HashMap<>();
 		
 		// current node(info)
 		NodeInfo cur_ni_f = new NodeInfo(from_nd, 0.0);
@@ -368,7 +371,7 @@ public class Sample {
 		double total_cost = 100000; // total cost
 
 		// Result
-		Output o = new Output();
+		final Output o = new Output();
 
 		// Path finding
 		while(true) {
@@ -391,8 +394,8 @@ public class Sample {
 		    // exit when cannot find shorter path (triangle inequality)
 	    	// (total cost) < (current f-side cost) + (current t-side cost)
 	    	if(cur_ni_f.cost + cur_ni_t.cost > total_cost){
-	    		Path f_path = getPath(from_nd, min_ni_f.nd, parent_f);
-	    		Path t_path = getPath(to_nd, min_ni_t.nd, parent_t);
+	    		final Path f_path = getPath(from_nd, min_ni_f.nd, parent_f);
+	    		final Path t_path = getPath(to_nd, min_ni_t.nd, parent_t);
 	    		o.path = cat(f_path, reverse(t_path));
 	    		o.cost = total_cost;
 	    		break;
@@ -405,8 +408,8 @@ public class Sample {
 			
 			// found total path
 			// find the node in the other side
-			NodeInfo ni_t = nodes_t.get(cur_ni_f.nd);
-			NodeInfo ni_f = nodes_f.get(cur_ni_t.nd);	
+			final NodeInfo ni_t = nodes_t.get(cur_ni_f.nd);
+			final NodeInfo ni_f = nodes_f.get(cur_ni_t.nd);	
 			
 			// the node is in the other side map and cost has been fixed (done)
 			if(ni_t != null && ni_t.done == true) {
@@ -425,41 +428,41 @@ public class Sample {
 			getAdjacentNodes(cur_ni_t, pq_t, nodes_t, parent_t);
 		}
 		// list for result
-		List<Output> o_l = new ArrayList<>();
+		final List<Output> o_l = new ArrayList<>();
 		o_l.add(o);
 		return o_l.stream();
 	}
 
 	// reverse Path
-	public Path reverse(Path p) {
+	public Path reverse(final Path p) {
 		PathImpl.Builder builder = new PathImpl.Builder(p.endNode());		
-		for(Relationship r: p.reverseRelationships()) {
+		for(final Relationship r: p.reverseRelationships()) {
 			builder = builder.push(r);
 		}
 		return builder.build();
 	}
 	// concatenate two Paths 
-	public Path cat(Path p1, Path p2) {
+	public Path cat(final Path p1, final Path p2) {
 		PathImpl.Builder builder = new PathImpl.Builder(p1.startNode());
-		Iterable<Relationship> rels1 = p1.relationships();
-		Iterable<Relationship> rels2 = p2.relationships();
-		for(Relationship r: rels1) {
+		final Iterable<Relationship> rels1 = p1.relationships();
+		final Iterable<Relationship> rels2 = p2.relationships();
+		for(final Relationship r: rels1) {
 			builder = builder.push(r);
 		}
-		for(Relationship r: rels2) {
+		for(final Relationship r: rels2) {
 			builder = builder.push(r);
 		}
 		return builder.build();
 	}
 	
 	// get adjacent nodes and add them to queue
-	public void getAdjacentNodes(NodeInfo cur_ni, PriorityQueue<NodeInfo> pq, Map<Node, NodeInfo> nodes, Map<Node, Relationship> parent) {
-		String cost_property = "cost";
-		Iterable<Relationship> rels = cur_ni.nd.getRelationships();
-		for (Relationship rel : rels) {
+	public void getAdjacentNodes(final NodeInfo cur_ni, final PriorityQueue<NodeInfo> pq, final Map<Node, NodeInfo> nodes, final Map<Node, Relationship> parent) {
+		final String cost_property = "cost";
+		final Iterable<Relationship> rels = cur_ni.nd.getRelationships();
+		for (final Relationship rel : rels) {
 			// get adjacent nodes and their costs
-			Node o_nd = rel.getOtherNode(cur_ni.nd);
-			double cost_rel = (double) rel.getProperty(cost_property);
+			final Node o_nd = rel.getOtherNode(cur_ni.nd);
+			final double cost_rel = (double) rel.getProperty(cost_property);
 			// check whether the node was found
 			NodeInfo next_ni = nodes.get(o_nd);
 			// not found -> 1st appearance of the node, add it to map
@@ -487,7 +490,7 @@ public class Sample {
 		public boolean done; // flag for cost fixed
 
 		// constructor
-		public NodeInfo(Node nd, double cost) {
+		public NodeInfo(final Node nd, final double cost) {
 			super();
 			this.nd = nd;
 			this.cost = cost;
@@ -496,12 +499,22 @@ public class Sample {
 
 		public String toString() {
 			String s = "";
-			Node nd_i = this.nd;
+			final Node nd_i = this.nd;
 			s = s + nd_i.getId();
 			s = s + ":";
 			s = s + this.cost;
 			s = s + ",";
 			return s;
 		}
+	}
+
+	// for debug: visualize fixed nodes
+	public String nodestoString(Map<Node, NodeInfo> nodes) {
+		String ret = "";
+		for (Map.Entry<Node, NodeInfo> entry : nodes.entrySet()) {
+			Node n = entry.getKey();
+			ret = ret + n.getProperty("no").toString() + " ";
+		}
+		return ret;
 	}
 }

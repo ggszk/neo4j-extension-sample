@@ -13,8 +13,6 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ggszk.ext_sample.Sample;
-
 public class SampleTest
 {
     // This rule starts a Neo4j instance for us
@@ -198,12 +196,13 @@ public class SampleTest
         session.run( "CREATE (p:S3 {no:0}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:1}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:2}) RETURN id(p)" );
-        session.run( "CREATE (p:S3 {no:3}) RETURN id(p)" );
+        session.run( "CREATE (p:S3 {no:3, category:'ramen'}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:4}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:5}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:6}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:7}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:8}) RETURN id(p)" );
+        session.run( "CREATE (p:S3 {no:9, category:'ramen'}) RETURN id(p)" );
     	session.run( "match (n {no:0}),(n1 {no:1}) CREATE (n)-[r:CONNECT_TO {cost:3.0}]->(n1)");
     	session.run( "match (n {no:0}),(n1 {no:2}) CREATE (n)-[r:CONNECT_TO {cost:4.0}]->(n1)");
     	session.run( "match (n {no:1}),(n1 {no:3}) CREATE (n)-[r:CONNECT_TO {cost:5.0}]->(n1)");
@@ -212,5 +211,7 @@ public class SampleTest
     	session.run( "match (n {no:3}),(n1 {no:6}) CREATE (n)-[r:CONNECT_TO {cost:1.0}]->(n1)");
     	session.run( "match (n {no:2}),(n1 {no:7}) CREATE (n)-[r:CONNECT_TO {cost:3.0}]->(n1)");
     	session.run( "match (n {no:5}),(n1 {no:8}) CREATE (n)-[r:CONNECT_TO {cost:2.0}]->(n1)");
+    	session.run( "match (n {no:0}),(n1 {no:9}) CREATE (n)-[r:CONNECT_TO {cost:6.0}]->(n1)");
+    	session.run( "match (n {no:8}),(n1 {no:9}) CREATE (n)-[r:CONNECT_TO {cost:7.0}]->(n1)");
     }
 }
