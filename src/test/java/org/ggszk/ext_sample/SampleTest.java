@@ -13,8 +13,6 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ggszk.ext_sample.Sample;
-
 public class SampleTest
 {
     // This rule starts a Neo4j instance for us
@@ -157,6 +155,34 @@ public class SampleTest
         	assertThat(costs.get(0), equalTo(12.0));
         }    	
     }
+    @Test
+    public void sample9_1test() throws Throwable
+    {
+        // In a try-block, to make sure we close the driver and session after the test
+        try(Driver driver = GraphDatabase.driver( neo4j.boltURI() , Config.build()
+                .withEncryptionLevel( Config.EncryptionLevel.NONE ).toConfig() );
+            Session session = driver.session() )
+        {
+        	createSample01(session);
+        	long fromId = session.run( "match (n {no:0}) RETURN id(n)" )
+                    .single()
+                    .get( 0 ).asLong();
+        	long toId = session.run( "match (n {no:8}) RETURN id(n)" )
+                    .single()
+                    .get( 0 ).asLong();
+            String category = "ramen";
+        	StatementResult r = session.run( "CALL example.sample9_1(" + fromId + ", " + toId + ", '" + category + "') yield path, cost, poi return path, cost, poi" );
+        	List<Double> costs = new ArrayList<Double>();
+        	while(r.hasNext()) {
+        		Record rec = r.next();
+        		System.out.println(rec.get(0).asPath().toString());        			
+        		System.out.println(PathtoString(rec.get(0).asPath()));       			
+        		costs.add(rec.get(1).asDouble());
+        		System.out.println("POI: " + rec.get(2).asNode().toString());   			
+        	}
+        	assertThat(costs.get(0), equalTo(12.0));
+        }    	
+    }
 	// print path
 	public String PathtoString(Path p) {
 		String s = "";
@@ -171,12 +197,13 @@ public class SampleTest
         session.run( "CREATE (p:S3 {no:0}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:1}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:2}) RETURN id(p)" );
-        session.run( "CREATE (p:S3 {no:3}) RETURN id(p)" );
+        session.run( "CREATE (p:S3 {no:3, category:'ramen'}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:4}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:5}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:6}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:7}) RETURN id(p)" );
         session.run( "CREATE (p:S3 {no:8}) RETURN id(p)" );
+        session.run( "CREATE (p:S3 {no:9, category:'ramen'}) RETURN id(p)" );
     	session.run( "match (n {no:0}),(n1 {no:1}) CREATE (n)-[r:CONNECT_TO {cost:3.0}]->(n1)");
     	session.run( "match (n {no:0}),(n1 {no:2}) CREATE (n)-[r:CONNECT_TO {cost:4.0}]->(n1)");
     	session.run( "match (n {no:1}),(n1 {no:3}) CREATE (n)-[r:CONNECT_TO {cost:5.0}]->(n1)");
@@ -185,5 +212,7 @@ public class SampleTest
     	session.run( "match (n {no:3}),(n1 {no:6}) CREATE (n)-[r:CONNECT_TO {cost:1.0}]->(n1)");
     	session.run( "match (n {no:2}),(n1 {no:7}) CREATE (n)-[r:CONNECT_TO {cost:3.0}]->(n1)");
     	session.run( "match (n {no:5}),(n1 {no:8}) CREATE (n)-[r:CONNECT_TO {cost:2.0}]->(n1)");
+    	session.run( "match (n {no:0}),(n1 {no:9}) CREATE (n)-[r:CONNECT_TO {cost:6.0}]->(n1)");
+    	session.run( "match (n {no:8}),(n1 {no:9}) CREATE (n)-[r:CONNECT_TO {cost:7.0}]->(n1)");
     }
 }
